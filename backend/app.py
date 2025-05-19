@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for, session
 from authlib.integrations.flask_client import OAuth
 from authlib.common.security import generate_token
+from routes.comments import comments_bp
 
 from routes.nyt import nyt_bp
 import os
@@ -9,12 +10,15 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 app.register_blueprint(nyt_bp)
+app.register_blueprint(comments_bp)
+
 
 
 oauth = OAuth(app)
 
 nonce = generate_token()
 
+print("Client name:", os.getenv('OIDC_CLIENT_NAME'))  # debug
 
 oauth.register(
     name=os.getenv('OIDC_CLIENT_NAME'),
@@ -55,6 +59,12 @@ def authorize():
 def logout():
     session.clear()
     return redirect('/')
+
+@app.route("/api/user")
+def get_user():
+    from flask import session, jsonify  # reference - https://flask.palletsprojects.com/en/2.3.x/api/#flask.session
+    return jsonify(session.get("user", {}))
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000)
