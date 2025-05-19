@@ -1,10 +1,14 @@
 from flask import Flask, redirect, url_for, session
 from authlib.integrations.flask_client import OAuth
 from authlib.common.security import generate_token
+
+from routes.nyt import nyt_bp
 import os
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+
+app.register_blueprint(nyt_bp)
 
 
 oauth = OAuth(app)
